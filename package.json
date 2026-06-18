@@ -8,7 +8,7 @@
     "preview": "bun --bun vite preview",
     "test": "bun --bun vitest run",
     "electron": "env -u ELECTRON_RUN_AS_NODE electron electron/main.cjs",
-    "electron:dev": "concurrently -k -n vite,electron -c cyan,magenta \"bun run dev\" \"wait-on tcp:127.0.0.1:5173 && env -u ELECTRON_RUN_AS_NODE electron electron/main.cjs\""
+    "electron:dev": "concurrently -k -n vite,electron -c cyan,magenta \"bun run dev\" \"wait-on http-get://localhost:5173 && env -u ELECTRON_RUN_AS_NODE electron electron/main.cjs\""
   },
   "main": "electron/main.cjs",
   "dependencies": {

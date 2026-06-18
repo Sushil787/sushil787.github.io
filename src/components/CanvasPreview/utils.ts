@@ -118,7 +118,12 @@ export const getShapeStyles = (
   top: `${shape.y}%`,
   transform: `translate(-50%, -50%) rotate(${shape.rotation ?? 0}deg)`,
   width: `${shape.width}%`,
-  height: `${shape.height}%`,
+  // A circle's width is a percentage of the canvas width; locking the pixel
+  // aspect ratio to 1:1 keeps it perfectly round on the portrait canvas
+  // instead of stretching with the (separate) height percentage.
+  ...(shape.type === "circle"
+    ? { aspectRatio: "1 / 1", height: "auto" as const }
+    : { height: `${shape.height}%` }),
   zIndex,
   ...getImageSelectionStyles(isSelected),
 });
@@ -147,7 +152,7 @@ export const getShapeFillStyles = (shape: Shape): React.CSSProperties => {
     filter: getDropShadowFilter(shape.shadow),
   };
 
-  if (shape.type === "ellipse") {
+  if (shape.type === "ellipse" || shape.type === "circle") {
     return { ...base, borderRadius: "50%" };
   }
   if (shape.type === "triangle") {

@@ -256,6 +256,7 @@ export const gradientPresets: GradientPreset[] = [
 
 export const shapeOptions: { type: ShapeType; label: string }[] = [
   { type: "rectangle", label: "Rectangle" },
+  { type: "circle", label: "Circle" },
   { type: "ellipse", label: "Ellipse" },
   { type: "triangle", label: "Triangle" },
 ];
@@ -275,4 +276,22 @@ export const exportSizes: ExportSize[] = [
   },
   { id: "5.5", label: "5.5 inch (iPhone 8 Plus)", width: 1242, height: 2208 },
   { id: "ipad", label: "12.9 inch (iPad Pro)", width: 2048, height: 2732 },
+  {
+    id: "android-phone",
+    label: "Android Phone (9:16)",
+    width: 1080,
+    height: 1920,
+  },
+  {
+    id: "android-tablet-7",
+    label: "Android 7\" Tablet",
+    width: 1200,
+    height: 1920,
+  },
+  {
+    id: "android-tablet-10",
+    label: "Android 10\" Tablet",
+    width: 1600,
+    height: 2560,
+  },
 ];

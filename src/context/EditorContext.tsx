@@ -1020,27 +1020,31 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     updateActiveScreenshot({ overlayImages: updatedImages });
   };
 
-  const bringImageForward = (imageId: string) => {
+  // Reorder an overlay image relative to its visible peers. Like shapes, images
+  // render in two groups (behind vs. in front of the device), so we swap with
+  // the nearest neighbor in the same layer rather than the raw array neighbor.
+  const reorderImageWithinLayer = (imageId: string, direction: 1 | -1) => {
     const images = [...activeScreenshot.overlayImages];
     const index = images.findIndex((img) => img.id === imageId);
-    if (index !== -1 && index < images.length - 1) {
-      const temp = images[index];
-      images[index] = images[index + 1];
-      images[index + 1] = temp;
-      updateActiveScreenshot({ overlayImages: images });
+    if (index === -1) return;
+    const isBehind = (img: ImageOverlay) => img.layer === "behind";
+    let target = -1;
+    for (let i = index + direction; i >= 0 && i < images.length; i += direction) {
+      if (isBehind(images[i]) === isBehind(images[index])) {
+        target = i;
+        break;
+      }
     }
+    if (target === -1) return;
+    [images[index], images[target]] = [images[target], images[index]];
+    updateActiveScreenshot({ overlayImages: images });
   };
 
-  const sendImageBackward = (imageId: string) => {
-    const images = [...activeScreenshot.overlayImages];
-    const index = images.findIndex((img) => img.id === imageId);
-    if (index > 0) {
-      const temp = images[index];
-      images[index] = images[index - 1];
-      images[index - 1] = temp;
-      updateActiveScreenshot({ overlayImages: images });
-    }
-  };
+  const bringImageForward = (imageId: string) =>
+    reorderImageWithinLayer(imageId, 1);
+
+  const sendImageBackward = (imageId: string) =>
+    reorderImageWithinLayer(imageId, -1);
 
   const bringImageToFront = (imageId: string) => {
     const images = [...activeScreenshot.overlayImages];
@@ -1063,17 +1067,20 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addShape = (type: ShapeType) => {
+    // Cascade each new shape so multiple shapes don't stack on the exact same
+    // spot (which would hide reordering and make them look like one shape).
+    const cascade = (activeScreenshot.shapes.length % 6) * 4;
     const newShape: Shape = {
       id: generateId(),
       type,
-      x: 50,
-      y: 50,
+      x: 50 + cascade,
+      y: 50 + cascade,
       width: 30,
       height: 30,
       fillMode: "solid",
-      color: "#ffffff",
-      gradientFrom: "#8b5cf6",
-      gradientTo: "#ec4899",
+      color: "#3b82f6",
+      gradientFrom: "#3b82f6",
+      gradientTo: "#06b6d4",
       gradientAngle: 90,
       opacity: 100,
       cornerRadius: type === "rectangle" ? 8 : 0,
@@ -1102,18 +1109,19 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     reader.onload = () => {
       const result = reader.result;
       if (typeof result !== "string") return;
+      const cascade = (activeScreenshot.shapes.length % 6) * 4;
       const newShape: Shape = {
         id: generateId(),
         type: "svg",
         src: result,
-        x: 50,
-        y: 50,
+        x: 50 + cascade,
+        y: 50 + cascade,
         width: 30,
         height: 30,
         fillMode: "original",
-        color: "#ffffff",
-        gradientFrom: "#8b5cf6",
-        gradientTo: "#ec4899",
+        color: "#3b82f6",
+        gradientFrom: "#3b82f6",
+        gradientTo: "#06b6d4",
         gradientAngle: 90,
         opacity: 100,
         cornerRadius: 0,
@@ -1173,23 +1181,46 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const bringShapeForward = (shapeId: string) => {
-    const shapes = [...activeScreenshot.shapes];
-    const index = shapes.findIndex((shape) => shape.id === shapeId);
-    if (index !== -1 && index < shapes.length - 1) {
-      [shapes[index], shapes[index + 1]] = [shapes[index + 1], shapes[index]];
-      updateActiveScreenshot({ shapes });
+  // Reorder a shape through one continuous stacking order that crosses the
+  // device. Shapes render in two groups (behind vs. in front of the device);
+  // we treat [behind..., front...] as the full bottom-to-top order. Moving past
+  // the top of the behind group flips the shape to the front of the device (and
+  // vice versa), so the arrows actually move shapes to the foreground/background.
+  const reorderShape = (shapeId: string, direction: 1 | -1) => {
+    const all = activeScreenshot.shapes;
+    const isBehind = (shape: Shape) => shape.layer === "behind";
+    const behind = all.filter(isBehind);
+    const front = all.filter((shape) => !isBehind(shape));
+    const ordered = [...behind, ...front];
+
+    const pos = ordered.findIndex((shape) => shape.id === shapeId);
+    if (pos === -1) return;
+    const next = pos + direction;
+    if (next < 0 || next >= ordered.length) return; // already at the extreme
+
+    const moving = ordered[pos];
+    const neighbor = ordered[next];
+
+    if (isBehind(moving) === isBehind(neighbor)) {
+      // Same side of the device: swap their stacking positions.
+      [ordered[pos], ordered[next]] = [ordered[next], ordered[pos]];
+      updateActiveScreenshot({ shapes: ordered });
+      return;
     }
+
+    // Crossing the device boundary: flip which side this shape sits on.
+    ordered[pos] = {
+      ...moving,
+      layer: isBehind(moving) ? "front" : "behind",
+    };
+    const reBehind = ordered.filter(isBehind);
+    const reFront = ordered.filter((shape) => !isBehind(shape));
+    updateActiveScreenshot({ shapes: [...reBehind, ...reFront] });
   };
 
-  const sendShapeBackward = (shapeId: string) => {
-    const shapes = [...activeScreenshot.shapes];
-    const index = shapes.findIndex((shape) => shape.id === shapeId);
-    if (index > 0) {
-      [shapes[index], shapes[index - 1]] = [shapes[index - 1], shapes[index]];
-      updateActiveScreenshot({ shapes });
-    }
-  };
+  const bringShapeForward = (shapeId: string) => reorderShape(shapeId, 1);
+
+  const sendShapeBackward = (shapeId: string) => reorderShape(shapeId, -1);
 
   const addDevice = () => {
     const nextDevice = activeDevice

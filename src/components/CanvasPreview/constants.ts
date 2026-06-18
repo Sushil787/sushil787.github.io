@@ -19,11 +19,11 @@ export const Z_INDEX = {
 } as const;
 
 /**
- * Selection highlight colors (purple theme)
+ * Selection highlight colors (blue theme)
  */
 export const SELECTION_COLORS = {
-  outline: "rgba(139, 92, 246, 0.8)",
-  background: "rgba(139, 92, 246, 0.15)",
-  shadow: "rgba(139, 92, 246, 0.4)",
+  outline: "rgba(59, 130, 246, 0.8)",
+  background: "rgba(59, 130, 246, 0.15)",
+  shadow: "rgba(59, 130, 246, 0.4)",
   imageOutline: "rgba(255, 255, 255, 0.8)",
 } as const;

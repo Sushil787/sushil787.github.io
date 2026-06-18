@@ -55,7 +55,12 @@ export type ImageOverlay = {
   shadow: ShadowConfig;
 };
 
-export type ShapeType = "rectangle" | "ellipse" | "triangle" | "svg";
+export type ShapeType =
+  | "rectangle"
+  | "circle"
+  | "ellipse"
+  | "triangle"
+  | "svg";
 
 /**
  * How a shape is filled.

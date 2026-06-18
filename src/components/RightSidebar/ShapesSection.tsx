@@ -56,6 +56,7 @@ interface ShapesSectionProps {
 
 const SHAPE_ICONS: Record<ShapeType, typeof Square> = {
   rectangle: Square,
+  circle: Circle,
   ellipse: Circle,
   triangle: Triangle,
   svg: Shapes,
@@ -346,25 +347,45 @@ export const ShapesSection = ({
                   </div>
                 )}
 
-                <RangeSlider
-                  label="Width"
-                  value={selectedShape.width}
-                  min={SLIDER_RANGES.shapeSize.min}
-                  max={SLIDER_RANGES.shapeSize.max}
-                  onChange={(width) => onUpdateShape(selectedShape.id, { width })}
-                  showValue={false}
-                />
+                {selectedShape.type === "circle" ? (
+                  <RangeSlider
+                    label="Size"
+                    value={selectedShape.width}
+                    min={SLIDER_RANGES.shapeSize.min}
+                    max={SLIDER_RANGES.shapeSize.max}
+                    onChange={(size) =>
+                      onUpdateShape(selectedShape.id, {
+                        width: size,
+                        height: size,
+                      })
+                    }
+                    showValue={false}
+                  />
+                ) : (
+                  <>
+                    <RangeSlider
+                      label="Width"
+                      value={selectedShape.width}
+                      min={SLIDER_RANGES.shapeSize.min}
+                      max={SLIDER_RANGES.shapeSize.max}
+                      onChange={(width) =>
+                        onUpdateShape(selectedShape.id, { width })
+                      }
+                      showValue={false}
+                    />
 
-                <RangeSlider
-                  label="Height"
-                  value={selectedShape.height}
-                  min={SLIDER_RANGES.shapeSize.min}
-                  max={SLIDER_RANGES.shapeSize.max}
-                  onChange={(height) =>
-                    onUpdateShape(selectedShape.id, { height })
-                  }
-                  showValue={false}
-                />
+                    <RangeSlider
+                      label="Height"
+                      value={selectedShape.height}
+                      min={SLIDER_RANGES.shapeSize.min}
+                      max={SLIDER_RANGES.shapeSize.max}
+                      onChange={(height) =>
+                        onUpdateShape(selectedShape.id, { height })
+                      }
+                      showValue={false}
+                    />
+                  </>
+                )}
 
                 <RangeSlider
                   label="Opacity"

@@ -1037,7 +1037,9 @@ export const exportScreenshots = async ({
     // Helper to draw a geometric shape
     const drawGeometricShape = (shape: Shape) => {
       const w = canvas.width * (shape.width / 100);
-      const h = canvas.height * (shape.height / 100);
+      // A circle locks to a 1:1 pixel aspect (width %), matching the preview.
+      const h =
+        shape.type === "circle" ? w : canvas.height * (shape.height / 100);
       const centerX = canvas.width * (shape.x / 100);
       const centerY = canvas.height * (shape.y / 100);
       const rotation = shape.rotation ?? 0;
@@ -1072,7 +1074,7 @@ export const exportScreenshots = async ({
       }
 
       ctx.beginPath();
-      if (shape.type === "ellipse") {
+      if (shape.type === "ellipse" || shape.type === "circle") {
         ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
       } else if (shape.type === "triangle") {
         ctx.moveTo(0, -h / 2);
