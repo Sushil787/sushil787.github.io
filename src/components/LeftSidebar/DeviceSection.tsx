@@ -66,7 +66,7 @@ export const DeviceSection = ({
 
     {/* Color picker */}
     <div className="mt-3">
-      <p className="text-xs text-gray-400 mb-2">Color</p>
+      <p className="text-xs text-neutral-500 dark:text-gray-400 mb-2">Color</p>
       <div className={STYLES.colorPicker}>
         {selectedDevice.colors.map((color) => (
           <ColorButton

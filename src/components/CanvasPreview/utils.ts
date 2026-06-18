@@ -4,7 +4,12 @@
  * Helper functions for computing styles and handling element interactions.
  */
 
-import type { ImageOverlay, SelectedElement, ShadowConfig } from "../../types";
+import type {
+  ImageOverlay,
+  SelectedElement,
+  ShadowConfig,
+  Shape,
+} from "../../types";
 import { SELECTION_COLORS } from "./constants";
 
 /**
@@ -95,3 +100,58 @@ export const getOverlayImageStyles = (
   zIndex,
   ...getImageSelectionStyles(isSelected),
 });
+
+/**
+ * Generates position and transform styles for the shape container.
+ *
+ * @param shape - Shape data
+ * @param zIndex - Z-index for stacking
+ * @param isSelected - Whether the shape is selected
+ * @returns Style object for positioning
+ */
+export const getShapeStyles = (
+  shape: Shape,
+  zIndex: number,
+  isSelected: boolean,
+): React.CSSProperties => ({
+  left: `${shape.x}%`,
+  top: `${shape.y}%`,
+  transform: `translate(-50%, -50%) rotate(${shape.rotation ?? 0}deg)`,
+  width: `${shape.width}%`,
+  height: `${shape.height}%`,
+  zIndex,
+  ...getImageSelectionStyles(isSelected),
+});
+
+/**
+ * Generates the fill styles for the inner shape element based on its type.
+ *
+ * @param shape - Shape data
+ * @returns Style object for the shape visual
+ */
+export const getShapeBackground = (shape: Shape): string => {
+  if (shape.fillMode === "gradient") {
+    // Store angle as 0 = left→right, 90 = top→bottom; CSS 0deg points up.
+    const cssAngle = (shape.gradientAngle ?? 90) + 90;
+    return `linear-gradient(${cssAngle}deg, ${shape.gradientFrom}, ${shape.gradientTo})`;
+  }
+  return shape.color;
+};
+
+export const getShapeFillStyles = (shape: Shape): React.CSSProperties => {
+  const base: React.CSSProperties = {
+    width: "100%",
+    height: "100%",
+    background: getShapeBackground(shape),
+    opacity: (shape.opacity ?? 100) / 100,
+    filter: getDropShadowFilter(shape.shadow),
+  };
+
+  if (shape.type === "ellipse") {
+    return { ...base, borderRadius: "50%" };
+  }
+  if (shape.type === "triangle") {
+    return { ...base, clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)" };
+  }
+  return { ...base, borderRadius: `${shape.cornerRadius ?? 0}%` };
+};

@@ -32,7 +32,7 @@ export const ShadowControls = ({
   onBlurChange,
   onOffsetYChange,
 }: ShadowControlsProps) => (
-  <div className="space-y-2 pt-2 border-t border-white/10">
+  <div className="space-y-2 pt-2 border-t border-black/10 dark:border-white/10">
     <Toggle label="Shadow" enabled={shadow.enabled} onChange={onToggle} />
 
     {shadow.enabled && (

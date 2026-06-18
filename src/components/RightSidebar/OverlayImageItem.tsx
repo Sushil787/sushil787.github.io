@@ -37,8 +37,8 @@ export const OverlayImageItem = ({
       className={STYLES.overlayThumbnail}
     />
     <div className="flex-1 min-w-0">
-      <p className="text-xs text-gray-300 truncate">Image {index + 1}</p>
-      <p className="text-[10px] text-gray-500">
+      <p className="text-xs text-neutral-700 dark:text-gray-300 truncate">Image {index + 1}</p>
+      <p className="text-[10px] text-neutral-400 dark:text-gray-500">
         Layer {index + 1} of {totalCount}
       </p>
     </div>

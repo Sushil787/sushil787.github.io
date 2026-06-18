@@ -19,6 +19,10 @@ interface OverlayImageProps {
   isInteractive: boolean;
   /** Handler for mouse down event */
   onMouseDown: (e: React.MouseEvent) => void;
+  /** Handler for right-click context menu */
+  onContextMenu?: (e: React.MouseEvent) => void;
+  /** Handler to start a corner-handle resize */
+  onResizeStart?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -49,12 +53,15 @@ export const OverlayImage = ({
   isSelected,
   isInteractive,
   onMouseDown,
+  onContextMenu,
+  onResizeStart,
 }: OverlayImageProps) => (
   <div
     data-draggable-element="image"
     className="absolute cursor-move select-none"
     style={getOverlayImageStyles(image, zIndex, isSelected)}
     onMouseDown={isInteractive ? onMouseDown : undefined}
+    onContextMenu={isInteractive ? onContextMenu : undefined}
     onClick={(e) => e.stopPropagation()}
   >
     <img
@@ -63,6 +70,6 @@ export const OverlayImage = ({
       className="w-full h-full object-contain pointer-events-none"
       style={{ filter: getDropShadowFilter(image.shadow) }}
     />
-    {isSelected && <SelectionHandles />}
+    {isSelected && <SelectionHandles onResizeStart={onResizeStart} />}
   </div>
 );

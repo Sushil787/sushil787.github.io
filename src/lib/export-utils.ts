@@ -4,8 +4,10 @@ import type {
   DeviceColor,
   ExportSize,
   DeviceInstance,
+  Shape,
 } from "../types";
 import { gradientPresets } from "../constants";
+import { buildSvgDataUrl, resolveSvgFill } from "./svg-utils";
 import { drawRichText } from "./rich-text-canvas";
 import { getDeviceColorById, getDeviceSpecById } from "./device-instances";
 import { getRenderableDevicesForScreenshot } from "./device-overflow";
@@ -990,8 +992,121 @@ export const exportScreenshots = async ({
       }
     };
 
+    // Helper to draw an SVG shape (async — needs to load the tinted image)
+    const drawSvgShape = async (shape: Shape) => {
+      if (!shape.src) return;
+      const w = canvas.width * (shape.width / 100);
+      const h = canvas.height * (shape.height / 100);
+      const centerX = canvas.width * (shape.x / 100);
+      const centerY = canvas.height * (shape.y / 100);
+      const rotation = shape.rotation ?? 0;
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise<void>((resolve) => {
+        img.onload = () => {
+          const imgAspect = img.naturalWidth / img.naturalHeight || 1;
+          const containerAspect = w / h;
+          let drawWidth = w;
+          let drawHeight = h;
+          if (imgAspect > containerAspect) {
+            drawHeight = w / imgAspect;
+          } else {
+            drawWidth = h * imgAspect;
+          }
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate((rotation * Math.PI) / 180);
+          ctx.globalAlpha = (shape.opacity ?? 100) / 100;
+          if (shape.shadow?.enabled) {
+            ctx.shadowColor = shape.shadow.color;
+            ctx.shadowBlur = shape.shadow.blur * scaleX;
+            ctx.shadowOffsetX = shape.shadow.offsetX * scaleX;
+            ctx.shadowOffsetY = shape.shadow.offsetY * scaleX;
+          }
+          ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+          ctx.restore();
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = buildSvgDataUrl(shape.src!, resolveSvgFill(shape));
+      });
+    };
+
+    // Helper to draw a geometric shape
+    const drawGeometricShape = (shape: Shape) => {
+      const w = canvas.width * (shape.width / 100);
+      const h = canvas.height * (shape.height / 100);
+      const centerX = canvas.width * (shape.x / 100);
+      const centerY = canvas.height * (shape.y / 100);
+      const rotation = shape.rotation ?? 0;
+
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.globalAlpha = (shape.opacity ?? 100) / 100;
+
+      if (shape.fillMode === "gradient") {
+        const rad = ((shape.gradientAngle ?? 90) * Math.PI) / 180;
+        const dx = Math.cos(rad);
+        const dy = Math.sin(rad);
+        const gradient = ctx.createLinearGradient(
+          (-dx * w) / 2,
+          (-dy * h) / 2,
+          (dx * w) / 2,
+          (dy * h) / 2,
+        );
+        gradient.addColorStop(0, shape.gradientFrom);
+        gradient.addColorStop(1, shape.gradientTo);
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = shape.color;
+      }
+
+      if (shape.shadow?.enabled) {
+        ctx.shadowColor = shape.shadow.color;
+        ctx.shadowBlur = shape.shadow.blur * scaleX;
+        ctx.shadowOffsetX = shape.shadow.offsetX * scaleX;
+        ctx.shadowOffsetY = shape.shadow.offsetY * scaleX;
+      }
+
+      ctx.beginPath();
+      if (shape.type === "ellipse") {
+        ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2);
+      } else if (shape.type === "triangle") {
+        ctx.moveTo(0, -h / 2);
+        ctx.lineTo(-w / 2, h / 2);
+        ctx.lineTo(w / 2, h / 2);
+        ctx.closePath();
+      } else {
+        const radius = Math.min(
+          (Math.min(w, h) * (shape.cornerRadius ?? 0)) / 100,
+          Math.min(w, h) / 2,
+        );
+        ctx.roundRect(-w / 2, -h / 2, w, h, radius);
+      }
+      ctx.fill();
+      ctx.restore();
+    };
+
+    // Helper to draw shapes for a given layer
+    const drawShapes = async (layer: "behind" | "front") => {
+      const shapes = (screenshot.shapes ?? []).filter(
+        (shape) => (shape.layer ?? "front") === layer,
+      );
+      for (const shape of shapes) {
+        if (shape.type === "svg") {
+          await drawSvgShape(shape);
+        } else {
+          drawGeometricShape(shape);
+        }
+      }
+    };
+
     // Draw overlay images behind device
     await drawOverlayImages("behind");
+    await drawShapes("behind");
 
     const renderableDevices = getRenderableDevicesForScreenshot(screenshots, i);
     for (const { device, localX } of renderableDevices) {
@@ -1038,6 +1153,7 @@ export const exportScreenshots = async ({
 
     // Draw overlay images in front of device
     await drawOverlayImages("front");
+    await drawShapes("front");
 
     // Add to exported files
     const dataURL = canvas.toDataURL("image/png");

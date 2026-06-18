@@ -30,10 +30,10 @@ interface SearchInputProps {
  * />
  */
 export const SearchInput = ({ value, onChange }: SearchInputProps) => (
-  <div className="p-4 border-b border-white/10 bg-[#1e1e1e]">
+  <div className="p-4 border-b border-black/10 dark:border-white/10 bg-neutral-100 dark:bg-[#1e1e1e]">
     <div className="relative">
       <Search
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-gray-400"
         size={18}
       />
       <input

@@ -14,6 +14,8 @@ import type {
   ExportSize,
   Screenshot,
   ImageOverlay,
+  Shape,
+  ShapeType,
   ShadowConfig,
   Project,
   SelectedElement,
@@ -91,12 +93,18 @@ interface EditorContextType {
   removeScreenshot: (id: string) => void;
   handleElementMouseDown: (
     e: React.MouseEvent,
-    type: "headline" | "subheadline" | "image" | "device",
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
     screenshotId: string,
     id?: string,
   ) => void;
   handleElementMouseMove: (e: MouseEvent) => void;
   handleElementMouseUp: () => void;
+  handleResizeStart: (
+    e: React.MouseEvent,
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
+    screenshotId: string,
+    id?: string,
+  ) => void;
   addOverlayImage: (file: File) => void;
   removeOverlayImage: (imageId: string) => void;
   updateOverlayImageSize: (imageId: string, widthPercent: number) => void;
@@ -106,6 +114,13 @@ interface EditorContextType {
     imageId: string,
     shadow: Partial<ShadowConfig>,
   ) => void;
+  addShape: (type: ShapeType) => void;
+  addSvgShape: (file: File) => void;
+  removeShape: (shapeId: string) => void;
+  updateShape: (shapeId: string, updates: Partial<Shape>) => void;
+  updateShapeShadow: (shapeId: string, shadow: Partial<ShadowConfig>) => void;
+  bringShapeForward: (shapeId: string) => void;
+  sendShapeBackward: (shapeId: string) => void;
   addDevice: () => void;
   selectDevice: (deviceId: string) => void;
   removeDevice: (deviceId: string) => void;
@@ -161,10 +176,37 @@ const createDefaultScreenshot = (
     subheadlineWidth: 80,
     fontFamily: "Inter",
     overlayImages: [],
+    shapes: [],
     devices: [defaultDevice],
     activeDeviceId: defaultDevice.id,
   };
 };
+
+const normalizeShape = (shape: Partial<Shape>): Shape => ({
+  id: shape.id ?? generateId(),
+  type: shape.type ?? "rectangle",
+  src: shape.src,
+  x: shape.x ?? 50,
+  y: shape.y ?? 50,
+  width: shape.width ?? 30,
+  height: shape.height ?? 30,
+  fillMode: shape.fillMode ?? (shape.type === "svg" ? "original" : "solid"),
+  color: shape.color ?? "#ffffff",
+  gradientFrom: shape.gradientFrom ?? "#8b5cf6",
+  gradientTo: shape.gradientTo ?? "#ec4899",
+  gradientAngle: shape.gradientAngle ?? 90,
+  opacity: shape.opacity ?? 100,
+  cornerRadius: shape.cornerRadius ?? 0,
+  layer: shape.layer ?? "behind",
+  rotation: shape.rotation ?? 0,
+  shadow: shape.shadow ?? {
+    enabled: false,
+    color: "#000000",
+    blur: 20,
+    offsetX: 0,
+    offsetY: 10,
+  },
+});
 
 const normalizeScreenshot = (
   screenshot: Partial<Screenshot> & LegacyScreenshotFields,
@@ -193,6 +235,7 @@ const normalizeScreenshot = (
     ...baseScreenshot,
     ...rest,
     overlayImages: screenshot.overlayImages ?? [],
+    shapes: (screenshot.shapes ?? []).map(normalizeShape),
     devices: deviceInstances,
     activeDeviceId,
   };
@@ -519,6 +562,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       subheadlineWidth: 80,
       fontFamily: activeScreenshot.fontFamily,
       overlayImages: [],
+      shapes: [],
       devices: activeScreenshot.devices.map((device) =>
         cloneDeviceInstance(device, { id: generateId() }),
       ),
@@ -531,7 +575,7 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
 
   const handleElementMouseDown = (
     e: React.MouseEvent,
-    type: "headline" | "subheadline" | "image" | "device",
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
     screenshotId: string,
     id?: string,
   ) => {
@@ -581,6 +625,11 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       if (image) {
         dragStartElementPos.current = { x: image.x, y: image.y };
       }
+    } else if (type === "shape" && id) {
+      const shape = targetScreenshot.shapes.find((item) => item.id === id);
+      if (shape) {
+        dragStartElementPos.current = { x: shape.x, y: shape.y };
+      }
     }
   };
 
@@ -610,6 +659,18 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       );
       updateScreenshotById(selectedElement.screenshotId, {
         overlayImages: updatedImages,
+      });
+    } else if (selectedElement.type === "shape" && selectedElement.id) {
+      const targetScreenshot = screenshots.find(
+        (screenshot) => screenshot.id === selectedElement.screenshotId,
+      );
+      if (!targetScreenshot) return;
+
+      const updatedShapes = targetScreenshot.shapes.map((shape) =>
+        shape.id === selectedElement.id ? { ...shape, x: newX, y: newY } : shape,
+      );
+      updateScreenshotById(selectedElement.screenshotId, {
+        shapes: updatedShapes,
       });
     } else if (selectedElement.type === "device" && selectedElement.id) {
       const targetScreenshot = screenshots.find(
@@ -673,6 +734,187 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener("mouseup", handleElementMouseUp);
     };
   }, [isDragging, handleElementMouseMove, handleElementMouseUp]);
+
+  // --- Corner-handle resize (scale) ---------------------------------------
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef<{
+    type: "headline" | "subheadline" | "image" | "shape" | "device";
+    screenshotId: string;
+    id?: string;
+    centerX: number;
+    centerY: number;
+    startDist: number;
+    startWidth: number;
+    startHeight: number;
+    startScale: number;
+    startFontSize: number;
+  } | null>(null);
+  const resizePending = useRef<number | null>(null);
+  const resizeRaf = useRef<number | null>(null);
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+  const handleResizeStart = (
+    e: React.MouseEvent,
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
+    screenshotId: string,
+    id?: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const elementNode = (e.currentTarget as HTMLElement).closest(
+      "[data-draggable-element]",
+    );
+    if (!(elementNode instanceof HTMLElement)) return;
+    const rect = elementNode.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const startDist = Math.max(
+      1,
+      Math.hypot(e.clientX - centerX, e.clientY - centerY),
+    );
+
+    const targetScreenshot =
+      screenshots.find((screenshot) => screenshot.id === screenshotId) ??
+      activeScreenshot;
+
+    let startWidth = 0;
+    let startHeight = 0;
+    let startScale = 0;
+    let startFontSize = 0;
+
+    if (type === "image" && id) {
+      const image = targetScreenshot.overlayImages.find((img) => img.id === id);
+      if (!image) return;
+      startWidth = image.width;
+      startHeight = image.height;
+    } else if (type === "shape" && id) {
+      const shape = targetScreenshot.shapes.find((item) => item.id === id);
+      if (!shape) return;
+      startWidth = shape.width;
+      startHeight = shape.height;
+    } else if (type === "device" && id) {
+      const device = targetScreenshot.devices.find((item) => item.id === id);
+      if (!device) return;
+      startScale = device.scale;
+    } else if (type === "headline") {
+      startFontSize = headlineFontSize;
+    } else if (type === "subheadline") {
+      startFontSize = subheadlineFontSize;
+    }
+
+    if (activeScreenshotId !== screenshotId) {
+      setActiveScreenshotIdState(screenshotId);
+    }
+    setSelectedElement({ type, id, screenshotId });
+    resizeRef.current = {
+      type,
+      screenshotId,
+      id,
+      centerX,
+      centerY,
+      startDist,
+      startWidth,
+      startHeight,
+      startScale,
+      startFontSize,
+    };
+    setIsResizing(true);
+  };
+
+  const applyResizeUpdate = useCallback(() => {
+    const data = resizeRef.current;
+    if (data === null || resizePending.current === null) return;
+    const scale = resizePending.current;
+
+    if (data.type === "image" && data.id) {
+      updateScreenshotById(data.screenshotId, {
+        overlayImages: (
+          screenshots.find((s) => s.id === data.screenshotId)?.overlayImages ??
+          []
+        ).map((img) =>
+          img.id === data.id
+            ? {
+                ...img,
+                width: clamp(data.startWidth * scale, 3, 200),
+                height: data.startHeight * scale,
+              }
+            : img,
+        ),
+      });
+    } else if (data.type === "shape" && data.id) {
+      updateScreenshotById(data.screenshotId, {
+        shapes: (
+          screenshots.find((s) => s.id === data.screenshotId)?.shapes ?? []
+        ).map((shape) =>
+          shape.id === data.id
+            ? {
+                ...shape,
+                width: clamp(data.startWidth * scale, 3, 200),
+                height: clamp(data.startHeight * scale, 3, 200),
+              }
+            : shape,
+        ),
+      });
+    } else if (data.type === "device" && data.id) {
+      updateScreenshotById(data.screenshotId, {
+        devices: (
+          screenshots.find((s) => s.id === data.screenshotId)?.devices ?? []
+        ).map((device) =>
+          device.id === data.id
+            ? { ...device, scale: clamp(data.startScale * scale, 15, 130) }
+            : device,
+        ),
+      });
+    } else if (data.type === "headline") {
+      setHeadlineFontSize(Math.round(clamp(data.startFontSize * scale, 16, 220)));
+    } else if (data.type === "subheadline") {
+      setSubheadlineFontSize(
+        Math.round(clamp(data.startFontSize * scale, 12, 200)),
+      );
+    }
+
+    resizePending.current = null;
+    resizeRaf.current = null;
+  }, [screenshots, updateScreenshotById]);
+
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      const data = resizeRef.current;
+      if (!data) return;
+      const dist = Math.hypot(e.clientX - data.centerX, e.clientY - data.centerY);
+      resizePending.current = dist / data.startDist;
+      if (resizeRaf.current === null) {
+        resizeRaf.current = requestAnimationFrame(applyResizeUpdate);
+      }
+    },
+    [applyResizeUpdate],
+  );
+
+  const handleResizeEnd = useCallback(() => {
+    setIsResizing(false);
+    if (resizeRaf.current !== null) {
+      cancelAnimationFrame(resizeRaf.current);
+      resizeRaf.current = null;
+    }
+    if (resizePending.current !== null) {
+      applyResizeUpdate();
+    }
+    resizeRef.current = null;
+  }, [applyResizeUpdate]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener("mousemove", handleResizeMove);
+      window.addEventListener("mouseup", handleResizeEnd);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleResizeMove);
+      window.removeEventListener("mouseup", handleResizeEnd);
+    };
+  }, [isResizing, handleResizeMove, handleResizeEnd]);
 
   const addOverlayImage = (file: File) => {
     const reader = new FileReader();
@@ -817,6 +1059,135 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
       const [image] = images.splice(index, 1);
       images.unshift(image);
       updateActiveScreenshot({ overlayImages: images });
+    }
+  };
+
+  const addShape = (type: ShapeType) => {
+    const newShape: Shape = {
+      id: generateId(),
+      type,
+      x: 50,
+      y: 50,
+      width: 30,
+      height: 30,
+      fillMode: "solid",
+      color: "#ffffff",
+      gradientFrom: "#8b5cf6",
+      gradientTo: "#ec4899",
+      gradientAngle: 90,
+      opacity: 100,
+      cornerRadius: type === "rectangle" ? 8 : 0,
+      layer: "front",
+      rotation: 0,
+      shadow: {
+        enabled: false,
+        color: "#000000",
+        blur: 20,
+        offsetX: 0,
+        offsetY: 10,
+      },
+    };
+    updateActiveScreenshot({
+      shapes: [...activeScreenshot.shapes, newShape],
+    });
+    setSelectedElement({
+      type: "shape",
+      id: newShape.id,
+      screenshotId: activeScreenshot.id,
+    });
+  };
+
+  const addSvgShape = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") return;
+      const newShape: Shape = {
+        id: generateId(),
+        type: "svg",
+        src: result,
+        x: 50,
+        y: 50,
+        width: 30,
+        height: 30,
+        fillMode: "original",
+        color: "#ffffff",
+        gradientFrom: "#8b5cf6",
+        gradientTo: "#ec4899",
+        gradientAngle: 90,
+        opacity: 100,
+        cornerRadius: 0,
+        layer: "front",
+        rotation: 0,
+        shadow: {
+          enabled: false,
+          color: "#000000",
+          blur: 20,
+          offsetX: 0,
+          offsetY: 10,
+        },
+      };
+      updateActiveScreenshot({
+        shapes: [...activeScreenshot.shapes, newShape],
+      });
+      setSelectedElement({
+        type: "shape",
+        id: newShape.id,
+        screenshotId: activeScreenshot.id,
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const removeShape = (shapeId: string) => {
+    updateActiveScreenshot({
+      shapes: activeScreenshot.shapes.filter((shape) => shape.id !== shapeId),
+    });
+    if (
+      selectedElement?.type === "shape" &&
+      selectedElement.screenshotId === activeScreenshot.id &&
+      selectedElement.id === shapeId
+    ) {
+      setSelectedElement(null);
+    }
+  };
+
+  const updateShape = (shapeId: string, updates: Partial<Shape>) => {
+    updateActiveScreenshot({
+      shapes: activeScreenshot.shapes.map((shape) =>
+        shape.id === shapeId ? { ...shape, ...updates } : shape,
+      ),
+    });
+  };
+
+  const updateShapeShadow = (
+    shapeId: string,
+    shadow: Partial<ShadowConfig>,
+  ) => {
+    updateActiveScreenshot({
+      shapes: activeScreenshot.shapes.map((shape) =>
+        shape.id === shapeId
+          ? { ...shape, shadow: { ...shape.shadow, ...shadow } }
+          : shape,
+      ),
+    });
+  };
+
+  const bringShapeForward = (shapeId: string) => {
+    const shapes = [...activeScreenshot.shapes];
+    const index = shapes.findIndex((shape) => shape.id === shapeId);
+    if (index !== -1 && index < shapes.length - 1) {
+      [shapes[index], shapes[index + 1]] = [shapes[index + 1], shapes[index]];
+      updateActiveScreenshot({ shapes });
+    }
+  };
+
+  const sendShapeBackward = (shapeId: string) => {
+    const shapes = [...activeScreenshot.shapes];
+    const index = shapes.findIndex((shape) => shape.id === shapeId);
+    if (index > 0) {
+      [shapes[index], shapes[index - 1]] = [shapes[index - 1], shapes[index]];
+      updateActiveScreenshot({ shapes });
     }
   };
 
@@ -1024,12 +1395,20 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
         handleElementMouseDown,
         handleElementMouseMove,
         handleElementMouseUp,
+        handleResizeStart,
         addOverlayImage,
         removeOverlayImage,
         updateOverlayImageSize,
         updateOverlayImageLayer,
         updateOverlayImageRotation,
         updateOverlayImageShadow,
+        addShape,
+        addSvgShape,
+        removeShape,
+        updateShape,
+        updateShapeShadow,
+        bringShapeForward,
+        sendShapeBackward,
         addDevice,
         selectDevice,
         removeDevice,

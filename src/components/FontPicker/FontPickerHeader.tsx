@@ -22,8 +22,8 @@ interface FontPickerHeaderProps {
  * <FontPickerHeader onClose={() => setIsOpen(false)} />
  */
 export const FontPickerHeader = ({ onClose }: FontPickerHeaderProps) => (
-  <div className="flex items-center justify-between p-4 border-b border-white/10">
-    <h2 className="text-lg font-semibold text-white">Select a Google Font</h2>
+  <div className="flex items-center justify-between p-4 border-b border-black/10 dark:border-white/10">
+    <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Select a Google Font</h2>
     <button
       onClick={onClose}
       className={STYLES.iconButton}

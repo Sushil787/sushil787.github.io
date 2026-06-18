@@ -25,6 +25,10 @@ interface DeviceContainerProps {
   isInteractive: boolean;
   /** Handler for mouse down event */
   onMouseDown: (e: React.MouseEvent) => void;
+  /** Handler for right-click context menu */
+  onContextMenu?: (e: React.MouseEvent) => void;
+  /** Handler to start a corner-handle resize */
+  onResizeStart?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -40,6 +44,8 @@ export const DeviceContainer = ({
   isSelected,
   isInteractive,
   onMouseDown,
+  onContextMenu,
+  onResizeStart,
 }: DeviceContainerProps) => {
   const is3D = device.style === "3d";
   const selectedDevice = getDeviceSpecById(device.deviceId);
@@ -59,6 +65,7 @@ export const DeviceContainer = ({
         perspective: is3D ? "1200px" : undefined,
       }}
       onMouseDown={isInteractive ? onMouseDown : undefined}
+      onContextMenu={isInteractive ? onContextMenu : undefined}
       onClick={(e) => e.stopPropagation()}
     >
       <div
@@ -91,7 +98,7 @@ export const DeviceContainer = ({
             selectedColor={selectedColor}
           />
         )}
-        {isSelected && <SelectionHandles />}
+        {isSelected && <SelectionHandles onResizeStart={onResizeStart} />}
       </div>
     </div>
   );

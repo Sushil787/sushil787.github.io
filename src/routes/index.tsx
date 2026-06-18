@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { loadGoogleFonts } from "../lib/google-fonts";
 import { EditorProvider } from "../context/EditorContext";
+import { ThemeProvider } from "../context/ThemeContext";
 import { EditorLayout } from "../components/EditorLayout";
 
 const RouteComponent = () => {
@@ -10,9 +11,11 @@ const RouteComponent = () => {
   }, []);
 
   return (
-    <EditorProvider>
-      <EditorLayout />
-    </EditorProvider>
+    <ThemeProvider>
+      <EditorProvider>
+        <EditorLayout />
+      </EditorProvider>
+    </ThemeProvider>
   );
 };
 

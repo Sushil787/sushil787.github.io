@@ -55,6 +55,40 @@ export type ImageOverlay = {
   shadow: ShadowConfig;
 };
 
+export type ShapeType = "rectangle" | "ellipse" | "triangle" | "svg";
+
+/**
+ * How a shape is filled.
+ * - "original": keep the source colors (only meaningful for uploaded SVGs)
+ * - "solid": a single flat color
+ * - "gradient": a gradient preset
+ */
+export type ShapeFillMode = "original" | "solid" | "gradient";
+
+export type Shape = {
+  id: string;
+  type: ShapeType;
+  /** Raw SVG markup, only set when type is "svg" */
+  src?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fillMode: ShapeFillMode;
+  color: string;
+  /** Custom gradient start color */
+  gradientFrom: string;
+  /** Custom gradient end color */
+  gradientTo: string;
+  /** Gradient angle in degrees */
+  gradientAngle: number;
+  opacity: number;
+  cornerRadius: number;
+  layer: "behind" | "front";
+  rotation: number;
+  shadow: ShadowConfig;
+};
+
 export type DeviceStyle = "flat" | "3d";
 
 export type DeviceInstance = {
@@ -88,12 +122,20 @@ export type Screenshot = {
   subheadlineWidth: number;
   fontFamily: string;
   overlayImages: ImageOverlay[];
+  shapes: Shape[];
   devices: DeviceInstance[];
   activeDeviceId: string;
 };
 
+export type ElementType =
+  | "headline"
+  | "subheadline"
+  | "image"
+  | "shape"
+  | "device";
+
 export type SelectedElement = {
-  type: "headline" | "subheadline" | "image" | "device";
+  type: ElementType;
   screenshotId: string;
   id?: string;
 };

@@ -1,14 +1,14 @@
-# AppShots App Store Screenshot Generator
+# ScreenShotEditor — Create App Store and Google Play Screenshots
 
-> AppShots is a free, open-source web tool for creating professional, high-converting screenshots for the Apple App Store and Google Play Store. It provides a full-featured drag-and-drop editor with multi-device layouts, cross-screen compositions, rich text highlights, overlays, and batch export.
+> ScreenShotEditor is a free, open-source web tool for creating professional, high-converting screenshots for the Apple App Store and Google Play Store. It provides a full-featured drag-and-drop editor with multi-device layouts, cross-screen compositions, rich text highlights, overlays, shapes, and batch export.
 
 Website: https://appshots.appstate.xyz
 GitHub: https://github.com/oyeolamilekan/appshots
 License: MIT
 
-## What AppShots Does
+## What ScreenShotEditor Does
 
-AppShots lets mobile developers and marketers design polished app store screenshots entirely in the browser. Users select a device frame, upload their app screenshot, add text and decorations, and export pixel-perfect images at the required App Store or Play Store resolutions. Everything runs client-side — no server uploads, no accounts, no watermarks.
+ScreenShotEditor lets mobile developers and marketers design polished app store screenshots entirely in the browser. Users select a device frame, upload their app screenshot, add text and decorations, and export pixel-perfect images at the required App Store or Play Store resolutions. Everything runs client-side — no server uploads, no accounts, no watermarks.
 
 ## Core Features
 
@@ -40,6 +40,15 @@ AppShots lets mobile developers and marketers design polished app store screensh
 - Per-image rotation control
 - Layer management: behind device, in front, bring forward/backward/to-front/to-back
 - Per-image shadow with color, blur, and offset controls
+
+### Shapes
+- Built-in shapes: rectangles, ellipses, and triangles
+- Custom SVG upload with on-the-fly recoloring
+- Fill modes: keep original colors, flatten to a solid color, or apply a linear gradient with adjustable angle
+- Color, width, height, opacity, and rotation controls
+- Corner-radius control for rectangles
+- Layer placement behind or in front of the device, with bring forward / send backward
+- Per-shape shadow with color, blur, and offset controls
 
 ### Layout & Positioning
 - 8 position presets: Centered, Bleed Bottom, Bleed Top, Float Center, Float Bottom, Tilt Left, Tilt Right, Perspective
@@ -84,7 +93,7 @@ AppShots lets mobile developers and marketers design polished app store screensh
 
 ## Architecture
 
-AppShots is a single-page application. All state is managed client-side with React Context (EditorContext) and persisted to localStorage.
+ScreenShotEditor is a single-page application. All state is managed client-side with React Context (EditorContext) and persisted to localStorage.
 
 ### Key Modules
 - `EditorContext` — Global editor state: active project, screenshots, device selection, font settings
@@ -127,7 +136,7 @@ AppShots is a single-page application. All state is managed client-side with Rea
 
 ## API / Integration Points
 
-AppShots is entirely client-side. There are no backend APIs. Data flows:
+ScreenShotEditor is entirely client-side. There are no backend APIs. Data flows:
 - Google Fonts API — loads font metadata and stylesheets
 - Canvas API — renders and exports screenshots as PNG
 - localStorage — persists projects and settings

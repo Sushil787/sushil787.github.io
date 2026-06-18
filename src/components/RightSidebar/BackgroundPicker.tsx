@@ -29,7 +29,7 @@ export const BackgroundPicker = ({
   onUpdateScreenshot,
 }: BackgroundPickerProps) => (
   <div>
-    <label className="block text-xs text-gray-400 mb-1">Background</label>
+    <label className="block text-xs text-neutral-500 dark:text-gray-400 mb-1">Background</label>
     <div className="space-y-2">
       {/* Mode toggle */}
       <div className="flex gap-2">

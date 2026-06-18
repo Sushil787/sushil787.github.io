@@ -185,17 +185,17 @@ export const PositionPresets = ({
   };
 
   return (
-    <div className="border-b border-zinc-800">
+    <div className="border-b border-black/10 dark:border-zinc-800">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-neutral-100 dark:hover:bg-zinc-800/50 transition-colors"
       >
-        <span className="text-sm font-medium text-white">Position Presets</span>
+        <span className="text-sm font-medium text-neutral-900 dark:text-white">Position Presets</span>
         {isExpanded ? (
-          <ChevronUp className="w-4 h-4 text-zinc-400" />
+          <ChevronUp className="w-4 h-4 text-neutral-400 dark:text-zinc-400" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-zinc-400" />
+          <ChevronDown className="w-4 h-4 text-neutral-400 dark:text-zinc-400" />
         )}
       </button>
 
@@ -211,18 +211,18 @@ export const PositionPresets = ({
                   onClick={() => handlePresetClick(preset)}
                   className={`flex flex-col items-center gap-1.5 p-2 rounded-lg transition-all ${
                     isActive
-                      ? "bg-violet-600/20 ring-2 ring-violet-500"
-                      : "bg-zinc-800 hover:bg-zinc-700"
+                      ? "bg-blue-100 ring-2 ring-blue-500 dark:bg-blue-600/20"
+                      : "bg-neutral-100 hover:bg-neutral-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
                   }`}
                 >
                   <div
-                    className={`${isActive ? "text-violet-400" : "text-zinc-500"}`}
+                    className={`${isActive ? "text-blue-600 dark:text-blue-400" : "text-neutral-500 dark:text-zinc-500"}`}
                   >
                     {preset.icon}
                   </div>
                   <span
                     className={`text-[10px] leading-tight text-center ${
-                      isActive ? "text-violet-400" : "text-zinc-400"
+                      isActive ? "text-blue-600 dark:text-blue-400" : "text-neutral-500 dark:text-zinc-400"
                     }`}
                   >
                     {preset.label}

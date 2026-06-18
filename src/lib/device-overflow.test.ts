@@ -49,6 +49,7 @@ describe("getRenderableDevicesForScreenshot", () => {
       subheadlineWidth: 80,
       fontFamily: "Inter",
       overlayImages: [],
+      shapes: [],
       activeDeviceId: screenshot.devices[0].id,
       ...screenshot,
     }));

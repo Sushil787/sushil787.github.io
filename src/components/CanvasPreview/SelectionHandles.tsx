@@ -1,32 +1,41 @@
 /**
  * SelectionHandles Component
  *
- * Corner handles displayed when an element is selected,
- * indicating it can be resized or manipulated.
+ * Corner handles displayed when an element is selected. When `onResizeStart`
+ * is provided, the handles become draggable grips that scale the element.
  */
 
 const HANDLE_POSITIONS = [
-  { className: "-top-1.5 -left-1.5" },
-  { className: "-top-1.5 -right-1.5" },
-  { className: "-bottom-1.5 -left-1.5" },
-  { className: "-bottom-1.5 -right-1.5" },
+  { corner: "tl", className: "-top-1.5 -left-1.5", cursor: "nwse-resize" },
+  { corner: "tr", className: "-top-1.5 -right-1.5", cursor: "nesw-resize" },
+  { corner: "bl", className: "-bottom-1.5 -left-1.5", cursor: "nesw-resize" },
+  { corner: "br", className: "-bottom-1.5 -right-1.5", cursor: "nwse-resize" },
 ] as const;
 
+interface SelectionHandlesProps {
+  /** When provided, handles are draggable and call this to start a resize. */
+  onResizeStart?: (e: React.MouseEvent) => void;
+}
+
 /**
- * SelectionHandles - Corner resize handles for selected elements
+ * SelectionHandles - Corner resize grips for selected elements
  *
- * Renders four corner handles that appear when an image overlay is selected.
- * Visual indicator for drag/resize operations.
+ * Renders four corner handles. With `onResizeStart`, dragging a handle scales
+ * the element around its center; without it, the handles are decorative.
  *
  * @example
- * {isSelected && <SelectionHandles />}
+ * {isSelected && <SelectionHandles onResizeStart={start} />}
  */
-export const SelectionHandles = () => (
+export const SelectionHandles = ({ onResizeStart }: SelectionHandlesProps) => (
   <>
-    {HANDLE_POSITIONS.map((pos, index) => (
+    {HANDLE_POSITIONS.map((pos) => (
       <div
-        key={index}
-        className={`absolute pointer-events-none ${pos.className} w-3 h-3 bg-white border-2 border-neutral-400 rounded-full shadow-sm`}
+        key={pos.corner}
+        onMouseDown={onResizeStart}
+        style={onResizeStart ? { cursor: pos.cursor } : undefined}
+        className={`absolute ${
+          onResizeStart ? "pointer-events-auto" : "pointer-events-none"
+        } ${pos.className} w-3 h-3 bg-white border-2 border-neutral-400 rounded-full shadow-sm`}
       />
     ))}
   </>

@@ -9,6 +9,7 @@ import type { Screenshot, ExportSize, SelectedElement } from "../../types";
 import type { RenderableDevice } from "../../lib/device-overflow";
 import { RemoveButton } from "./RemoveButton";
 import { OverlayImage } from "./OverlayImage";
+import { ShapeElement } from "./ShapeElement";
 import { TextElement } from "./TextElement";
 import { DeviceContainer } from "./DeviceContainer";
 import { isElementSelected } from "./utils";
@@ -44,12 +45,26 @@ interface ScreenshotCardProps {
   /** Handler for element mouse down */
   onElementMouseDown: (
     e: React.MouseEvent,
-    type: "headline" | "subheadline" | "image" | "device",
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
     screenshotId: string,
     id?: string,
   ) => void;
   /** Handler for element mouse up */
   onElementMouseUp: () => void;
+  /** Handler for element right-click context menu */
+  onElementContextMenu: (
+    e: React.MouseEvent,
+    type: "image" | "shape" | "device",
+    screenshotId: string,
+    id: string,
+  ) => void;
+  /** Handler to start a corner-handle resize */
+  onElementResizeStart: (
+    e: React.MouseEvent,
+    type: "headline" | "subheadline" | "image" | "shape" | "device",
+    screenshotId: string,
+    id?: string,
+  ) => void;
 }
 
 /**
@@ -76,6 +91,8 @@ export const ScreenshotCard = ({
   onDeselect,
   onElementMouseDown,
   onElementMouseUp,
+  onElementContextMenu,
+  onElementResizeStart,
 }: ScreenshotCardProps) => {
   // Split overlay images by layer
   const behindImages = screenshot.overlayImages.filter(
@@ -84,6 +101,11 @@ export const ScreenshotCard = ({
   const frontImages = screenshot.overlayImages.filter(
     (img) => img.layer !== "behind",
   );
+
+  // Split shapes by layer
+  const shapes = screenshot.shapes ?? [];
+  const behindShapes = shapes.filter((shape) => shape.layer === "behind");
+  const frontShapes = shapes.filter((shape) => shape.layer !== "behind");
 
   // Handle background click to deselect
   const handleBackgroundMouseDown = (e: React.MouseEvent) => {
@@ -132,6 +154,37 @@ export const ScreenshotCard = ({
             onMouseDown={(e) =>
               onElementMouseDown(e, "image", screenshot.id, image.id)
             }
+            onContextMenu={(e) =>
+              onElementContextMenu(e, "image", screenshot.id, image.id)
+            }
+            onResizeStart={(e) =>
+              onElementResizeStart(e, "image", screenshot.id, image.id)
+            }
+          />
+        ))}
+
+        {/* Shapes behind device */}
+        {behindShapes.map((shape, index) => (
+          <ShapeElement
+            key={shape.id}
+            shape={shape}
+            zIndex={Z_INDEX.behindDevice + behindImages.length + index}
+            isSelected={isElementSelected(
+              isActive ? selectedElement : null,
+              "shape",
+              screenshot.id,
+              shape.id,
+            )}
+            isInteractive={isActive}
+            onMouseDown={(e) =>
+              onElementMouseDown(e, "shape", screenshot.id, shape.id)
+            }
+            onContextMenu={(e) =>
+              onElementContextMenu(e, "shape", screenshot.id, shape.id)
+            }
+            onResizeStart={(e) =>
+              onElementResizeStart(e, "shape", screenshot.id, shape.id)
+            }
           />
         ))}
 
@@ -151,6 +204,9 @@ export const ScreenshotCard = ({
           }
           isInteractive={isActive}
           onMouseDown={(e) => onElementMouseDown(e, "headline", screenshot.id)}
+          onResizeStart={(e) =>
+            onElementResizeStart(e, "headline", screenshot.id)
+          }
         />
 
         {/* Subheadline */}
@@ -171,6 +227,9 @@ export const ScreenshotCard = ({
           onMouseDown={(e) =>
             onElementMouseDown(e, "subheadline", screenshot.id)
           }
+          onResizeStart={(e) =>
+            onElementResizeStart(e, "subheadline", screenshot.id)
+          }
         />
 
         {/* Devices, including visible overflow from neighboring screenshots */}
@@ -190,6 +249,12 @@ export const ScreenshotCard = ({
             onMouseDown={(e) =>
               onElementMouseDown(e, "device", ownerScreenshotId, device.id)
             }
+            onContextMenu={(e) =>
+              onElementContextMenu(e, "device", ownerScreenshotId, device.id)
+            }
+            onResizeStart={(e) =>
+              onElementResizeStart(e, "device", ownerScreenshotId, device.id)
+            }
           />
         ))}
 
@@ -208,6 +273,37 @@ export const ScreenshotCard = ({
             isInteractive={isActive}
             onMouseDown={(e) =>
               onElementMouseDown(e, "image", screenshot.id, image.id)
+            }
+            onContextMenu={(e) =>
+              onElementContextMenu(e, "image", screenshot.id, image.id)
+            }
+            onResizeStart={(e) =>
+              onElementResizeStart(e, "image", screenshot.id, image.id)
+            }
+          />
+        ))}
+
+        {/* Shapes in front of device */}
+        {frontShapes.map((shape, index) => (
+          <ShapeElement
+            key={shape.id}
+            shape={shape}
+            zIndex={Z_INDEX.frontDevice + frontImages.length + index}
+            isSelected={isElementSelected(
+              isActive ? selectedElement : null,
+              "shape",
+              screenshot.id,
+              shape.id,
+            )}
+            isInteractive={isActive}
+            onMouseDown={(e) =>
+              onElementMouseDown(e, "shape", screenshot.id, shape.id)
+            }
+            onContextMenu={(e) =>
+              onElementContextMenu(e, "shape", screenshot.id, shape.id)
+            }
+            onResizeStart={(e) =>
+              onElementResizeStart(e, "shape", screenshot.id, shape.id)
             }
           />
         ))}

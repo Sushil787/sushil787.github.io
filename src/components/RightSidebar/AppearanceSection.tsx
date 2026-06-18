@@ -45,7 +45,7 @@ export const AppearanceSection = ({
 
       {/* Text Color */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Text Color</label>
+        <label className="block text-xs text-neutral-500 dark:text-gray-400 mb-1">Text Color</label>
         <input
           type="color"
           value={screenshot.textColor}
@@ -56,12 +56,12 @@ export const AppearanceSection = ({
 
       {/* Font Style */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">Font Style</label>
+        <label className="block text-xs text-neutral-500 dark:text-gray-400 mb-1">Font Style</label>
         <button onClick={onOpenFontPicker} className={STYLES.dropdownButton}>
           <span style={{ fontFamily: `'${screenshot.fontFamily}', sans-serif` }}>
             {screenshot.fontFamily}
           </span>
-          <ChevronDown size={16} className="text-gray-400" />
+          <ChevronDown size={16} className="text-neutral-500 dark:text-gray-400" />
         </button>
       </div>
     </div>

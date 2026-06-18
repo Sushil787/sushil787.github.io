@@ -59,10 +59,10 @@ export const LayoutSection = ({
       <div className="space-y-3">
         {/* Device Style Toggle */}
         <div>
-          <label className="block text-xs text-gray-400 mb-2">
+          <label className="block text-xs text-neutral-500 dark:text-gray-400 mb-2">
             Device Style
           </label>
-          <div className="flex gap-1 p-0.5 bg-[#2a2a2a] rounded-lg">
+          <div className="flex gap-1 p-0.5 bg-neutral-200 dark:bg-[#2a2a2a] rounded-lg">
             <button
               className={`${STYLES.modeButton} ${!is3D ? STYLES.modeButtonActive : STYLES.modeButtonInactive}`}
               onClick={() => onUpdateDevice({ style: "flat" })}
@@ -157,7 +157,7 @@ export const LayoutSection = ({
 
         <label className="block">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-gray-400">Headline Width</span>
+            <span className="text-xs text-neutral-500 dark:text-gray-400">Headline Width</span>
             <span className="text-xs text-neutral-400 font-medium">
               {screenshot.headlineWidth}%
             </span>
@@ -171,13 +171,13 @@ export const LayoutSection = ({
             onChange={(e) =>
               onUpdateScreenshot({ headlineWidth: Number(e.target.value) })
             }
-            className="w-full accent-white h-2 rounded-lg appearance-none cursor-pointer bg-[#2a2a2a]"
+            className="w-full accent-neutral-900 dark:accent-white h-2 rounded-lg appearance-none cursor-pointer bg-neutral-200 dark:bg-[#2a2a2a]"
           />
         </label>
 
         <label className="block">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-gray-400">Subheadline Width</span>
+            <span className="text-xs text-neutral-500 dark:text-gray-400">Subheadline Width</span>
             <span className="text-xs text-neutral-400 font-medium">
               {screenshot.subheadlineWidth}%
             </span>
@@ -191,7 +191,7 @@ export const LayoutSection = ({
             onChange={(e) =>
               onUpdateScreenshot({ subheadlineWidth: Number(e.target.value) })
             }
-            className="w-full accent-white h-2 rounded-lg appearance-none cursor-pointer bg-[#2a2a2a]"
+            className="w-full accent-neutral-900 dark:accent-white h-2 rounded-lg appearance-none cursor-pointer bg-neutral-200 dark:bg-[#2a2a2a]"
           />
         </label>
       </div>

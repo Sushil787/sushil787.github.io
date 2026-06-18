@@ -1,4 +1,9 @@
-import type { DeviceSpec, GradientPreset, ExportSize } from "./types";
+import type {
+  DeviceSpec,
+  GradientPreset,
+  ExportSize,
+  ShapeType,
+} from "./types";
 
 export const GITHUB_REPO_URL = "https://github.com/oyeolamilekan/appshots";
 
@@ -243,6 +248,12 @@ export const gradientPresets: GradientPreset[] = [
   { id: "berry", label: "Berry", from: "#e1eec3", to: "#f05053" },
   { id: "royal", label: "Royal", from: "#141E30", to: "#243B55" },
   { id: "rose", label: "Rose", from: "#f4c4f3", to: "#fc67fa" },
+];
+
+export const shapeOptions: { type: ShapeType; label: string }[] = [
+  { type: "rectangle", label: "Rectangle" },
+  { type: "ellipse", label: "Ellipse" },
+  { type: "triangle", label: "Triangle" },
 ];
 
 export const exportSizes: ExportSize[] = [

@@ -7,6 +7,7 @@
 import type React from "react";
 import { getTextSelectionStyles } from "./utils";
 import { Z_INDEX } from "./constants";
+import { SelectionHandles } from "./SelectionHandles";
 import { normalizeRichTextHighlights } from "../../lib/rich-text-highlight";
 
 interface TextElementProps {
@@ -32,6 +33,8 @@ interface TextElementProps {
   isInteractive: boolean;
   /** Handler for mouse down event */
   onMouseDown: (e: React.MouseEvent) => void;
+  /** Handler to start a corner-handle resize (scales the font size) */
+  onResizeStart?: (e: React.MouseEvent) => void;
 }
 
 /**
@@ -69,6 +72,7 @@ export const TextElement = ({
   isSelected,
   isInteractive,
   onMouseDown,
+  onResizeStart,
 }: TextElementProps) => {
   const isHeadline = type === "headline";
   const normalizedContent = normalizeRichTextHighlights(content);
@@ -76,21 +80,13 @@ export const TextElement = ({
   return (
     <div
       data-draggable-element={type}
-      className={`absolute cursor-move text-center select-none whitespace-pre-wrap overflow-hidden ${
-        isHeadline ? "font-bold" : "font-semibold"
-      }`}
+      className="absolute cursor-move select-none"
       style={{
         left: `${x}%`,
         top: `${y}%`,
         transform: "translateX(-50%)",
         width: `${width}%`,
         maxWidth: `${width}%`,
-        fontSize: `${fontSize}px`,
-        lineHeight: 1.1,
-        color,
-        fontFamily: `'${fontFamily}', sans-serif`,
-        wordWrap: "break-word",
-        overflowWrap: "break-word",
         zIndex: Z_INDEX.text,
         padding: "4px",
         borderRadius: "4px",
@@ -98,7 +94,24 @@ export const TextElement = ({
       }}
       onMouseDown={isInteractive ? onMouseDown : undefined}
       onClick={(e) => e.stopPropagation()}
-      dangerouslySetInnerHTML={{ __html: normalizedContent }}
-    />
+    >
+      <div
+        className={`text-center whitespace-pre-wrap overflow-hidden ${
+          isHeadline ? "font-bold" : "font-semibold"
+        }`}
+        style={{
+          fontSize: `${fontSize}px`,
+          lineHeight: 1.1,
+          color,
+          fontFamily: `'${fontFamily}', sans-serif`,
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+        }}
+        dangerouslySetInnerHTML={{ __html: normalizedContent }}
+      />
+      {isSelected && isInteractive && (
+        <SelectionHandles onResizeStart={onResizeStart} />
+      )}
+    </div>
   );
 };

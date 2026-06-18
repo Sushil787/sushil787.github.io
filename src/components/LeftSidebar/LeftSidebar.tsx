@@ -52,7 +52,7 @@ export const LeftSidebar = () => {
       <SidebarHeader />
 
       {/* Project Switcher */}
-      <div className="px-4 pb-4 border-b border-zinc-800">
+      <div className="px-4 pb-4 border-b border-black/10 dark:border-zinc-800">
         <ProjectSwitcher />
       </div>
 

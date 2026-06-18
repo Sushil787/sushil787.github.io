@@ -26,18 +26,18 @@ interface ToolbarProps {
  * <Toolbar onAddScreenshot={addScreenshot} screenshotCount={3} />
  */
 export const Toolbar = ({ onAddScreenshot, screenshotCount }: ToolbarProps) => (
-  <div className="h-14 border-b border-white/10 bg-[#141414] flex items-center px-4 gap-4">
+  <div className="h-14 border-b border-black/10 dark:border-white/10 bg-white dark:bg-[#141414] flex items-center px-4 gap-4">
     <div className="flex items-center gap-2">
       <button
         onClick={onAddScreenshot}
-        className="flex items-center gap-1.5 bg-white hover:bg-neutral-200 text-black text-sm font-medium px-3 py-1.5 rounded-md transition-colors"
+        className="flex items-center gap-1.5 bg-neutral-900 dark:bg-white hover:bg-neutral-800 dark:hover:bg-neutral-200 text-white dark:text-black text-sm font-medium px-3 py-1.5 rounded-md transition-colors"
       >
         <Plus className="w-4 h-4" />
         Add Screenshot
       </button>
     </div>
     <div className="flex-1" />
-    <span className="text-xs text-gray-400">
+    <span className="text-xs text-neutral-500 dark:text-gray-400">
       {screenshotCount} screenshot{screenshotCount !== 1 ? "s" : ""}
     </span>
   </div>

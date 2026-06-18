@@ -20,6 +20,7 @@ import { LayoutSection } from "./LayoutSection";
 import { ContentSection } from "./ContentSection";
 import { AppearanceSection } from "./AppearanceSection";
 import { OverlayImagesSection } from "./OverlayImagesSection";
+import { ShapesSection } from "./ShapesSection";
 import { STYLES } from "./constants";
 
 /**
@@ -58,6 +59,13 @@ export const RightSidebar = () => {
     sendDeviceBackward,
     bringImageForward,
     sendImageBackward,
+    addShape,
+    addSvgShape,
+    removeShape,
+    updateShape,
+    updateShapeShadow,
+    bringShapeForward,
+    sendShapeBackward,
   } = useEditor();
 
   return (
@@ -131,6 +139,20 @@ export const RightSidebar = () => {
           onUpdateShadow={updateOverlayImageShadow}
           onBringForward={bringImageForward}
           onSendBackward={sendImageBackward}
+        />
+
+        <ShapesSection
+          screenshot={activeScreenshot}
+          selectedElement={selectedElement}
+          gradientPresets={gradientPresets}
+          onSelectElement={setSelectedElement}
+          onAddShape={addShape}
+          onAddSvg={addSvgShape}
+          onRemoveShape={removeShape}
+          onUpdateShape={updateShape}
+          onUpdateShadow={updateShapeShadow}
+          onBringForward={bringShapeForward}
+          onSendBackward={sendShapeBackward}
         />
       </div>
     </aside>

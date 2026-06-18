@@ -1,4 +1,4 @@
-# 📱 App Store Screenshot Generator
+# 📱 ScreenShotEditor — Create App Store & Google Play Screenshots
 
 A free, open-source tool to create stunning, high-converting screenshots for the Apple App Store and Google Play Store in minutes. Design professional app previews with an intuitive drag-and-drop editor.
 
@@ -28,6 +28,7 @@ A free, open-source tool to create stunning, high-converting screenshots for the
 
 - **Solid color backgrounds** with a full color picker
 - **Gradient presets** — Sunset, Ocean, Mint, Berry, Royal, Rose
+- **Image backgrounds** — use an uploaded image as the screenshot backdrop
 - **Global text color picker**
 
 ### 📝 Rich Text & Fonts
@@ -46,6 +47,16 @@ A free, open-source tool to create stunning, high-converting screenshots for the
 - **Rotation control** per image
 - **Layer management** — place behind or in front of the device, reorder with bring forward/backward/to-front/to-back
 - **Per-image shadow** — enable/disable with color, blur, and offset controls
+
+### 🔷 Shapes
+
+- **Built-in shapes** — add rectangles, ellipses, and triangles to any screenshot
+- **Custom SVG upload** — drop in your own SVG and recolor it on the fly
+- **Flexible fills** — keep an SVG's original colors, flatten to a solid color, or apply a linear gradient with adjustable angle
+- **Full styling** — color, width, height, opacity, and rotation controls
+- **Rounded corners** — corner-radius control for rectangles
+- **Layer placement** — render shapes behind or in front of the device, reorder with bring forward / send backward
+- **Per-shape shadow** — toggle with color, blur, and offset controls
 
 ### 📸 Screenshot Image
 
@@ -130,14 +141,14 @@ The built files will be in the `dist/` directory.
 ```
 src/
 ├── components/
-│   ├── CanvasPreview/       # Main canvas, screenshot cards, device container, overlays
+│   ├── CanvasPreview/       # Main canvas, screenshot cards, device container, overlays, shapes
 │   ├── DeviceFrame/         # Device mockups (flat 2D & 3D with edges)
 │   ├── FontPicker/          # Google Fonts search & selection
 │   ├── GitHubStarModal.tsx  # Post-export GitHub star modal
 │   ├── LeftSidebar/         # Device picker, color picker, export controls
 │   ├── ProjectSwitcher/     # Project management UI
 │   ├── RichTextEditor/      # Rich text formatting toolbar & editor
-│   ├── RightSidebar/        # Layout, appearance, content, device, overlay controls
+│   ├── RightSidebar/        # Layout, appearance, content, device, overlay, shape controls
 │   ├── EditorLayout.tsx     # Main editor layout shell
 │   └── ui/                  # shadcn/ui components
 ├── context/
@@ -148,6 +159,7 @@ src/
 │   ├── export-utils.ts      # Canvas-based screenshot export (flat & 3D)
 │   ├── google-fonts.ts      # Google Fonts API loader
 │   ├── rich-text-canvas.ts  # Rich text rendering for canvas export
+│   ├── svg-utils.ts         # SVG recoloring (solid/gradient) & data URL builder
 │   └── useLocalStorage.ts   # Persistence hooks
 ├── routes/
 │   ├── __root.tsx           # Root layout
@@ -171,8 +183,9 @@ src/
 9. **Switch to 3D** — toggle to 3D mode and adjust perspective angles
 10. **Span screenshots** — drag devices past the left or right edge to continue them into adjacent screenshots
 11. **Add overlays** — upload badges, logos, or decorations and layer them around the device
-12. **Manage screenshots** — add more screenshots to create a complete set
-13. **Export** — download all screenshots at App Store resolution, then optionally star the project from the post-export modal
+12. **Add shapes** — drop in rectangles, ellipses, triangles, or custom SVGs and style their color, fill, and shadow
+13. **Manage screenshots** — add more screenshots to create a complete set
+14. **Export** — download all screenshots at App Store resolution, then optionally star the project from the post-export modal
 
 ## 🤝 Contributing
 

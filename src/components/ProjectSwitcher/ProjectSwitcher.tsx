@@ -79,11 +79,11 @@ const ProjectItem = ({
           onChange={(e) => setEditName(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
-          className="flex-1 px-2 py-1 text-sm bg-zinc-800 border border-zinc-600 rounded text-white focus:outline-none focus:border-violet-500"
+          className="flex-1 px-2 py-1 text-sm bg-neutral-100 dark:bg-zinc-800 border border-black/10 dark:border-zinc-600 rounded text-neutral-900 dark:text-white focus:outline-none focus:border-blue-500"
         />
         <button
           onClick={handleSave}
-          className="p-1 hover:bg-zinc-700 rounded text-green-400"
+          className="p-1 hover:bg-neutral-200 dark:hover:bg-zinc-700 rounded text-green-600 dark:text-green-400"
         >
           <Check className="w-4 h-4" />
         </button>
@@ -92,7 +92,7 @@ const ProjectItem = ({
             setEditName(project.name);
             setIsEditing(false);
           }}
-          className="p-1 hover:bg-zinc-700 rounded text-red-400"
+          className="p-1 hover:bg-neutral-200 dark:hover:bg-zinc-700 rounded text-red-500 dark:text-red-400"
         >
           <X className="w-4 h-4" />
         </button>
@@ -104,15 +104,15 @@ const ProjectItem = ({
     <div
       className={`group flex items-center justify-between px-3 py-2 cursor-pointer transition-colors ${
         isActive
-          ? "bg-violet-600/20 text-violet-400"
-          : "hover:bg-zinc-800 text-zinc-300"
+          ? "bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-400"
+          : "hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-700 dark:text-zinc-300"
       }`}
       onClick={onSelect}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <FolderOpen className="w-4 h-4 flex-shrink-0" />
         <span className="truncate text-sm">{project.name}</span>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-neutral-400 dark:text-zinc-500">
           ({project.screenshots.length})
         </span>
       </div>
@@ -123,7 +123,7 @@ const ProjectItem = ({
             e.stopPropagation();
             setIsEditing(true);
           }}
-          className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-white"
+          className="p-1 hover:bg-neutral-200 dark:hover:bg-zinc-700 rounded text-neutral-400 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-white"
           title="Rename project"
         >
           <Pencil className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ const ProjectItem = ({
               e.stopPropagation();
               onDelete();
             }}
-            className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-red-400"
+            className="p-1 hover:bg-neutral-200 dark:hover:bg-zinc-700 rounded text-neutral-400 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400"
             title="Delete project"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -211,14 +211,14 @@ export const ProjectSwitcher = () => {
       {/* Trigger button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-white text-sm transition-colors"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-neutral-100 dark:bg-zinc-800 hover:bg-neutral-200 dark:hover:bg-zinc-700 border border-black/10 dark:border-zinc-700 rounded-lg text-neutral-900 dark:text-white text-sm transition-colors"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <FolderOpen className="w-4 h-4 text-violet-400 flex-shrink-0" />
+          <FolderOpen className="w-4 h-4 text-blue-400 flex-shrink-0" />
           <span className="truncate">{activeProject.name}</span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-zinc-400 flex-shrink-0 transition-transform ${
+          className={`w-4 h-4 text-neutral-400 dark:text-zinc-400 flex-shrink-0 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -226,10 +226,10 @@ export const ProjectSwitcher = () => {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-50 overflow-hidden">
+        <div className="absolute top-full left-0 mt-1 w-full bg-white dark:bg-zinc-900 border border-black/10 dark:border-zinc-700 rounded-lg shadow-xl z-50 overflow-hidden">
           {/* Header */}
-          <div className="px-3 py-2 border-b border-zinc-800">
-            <span className="text-xs font-medium text-zinc-500 uppercase tracking-wide">
+          <div className="px-3 py-2 border-b border-black/10 dark:border-zinc-800">
+            <span className="text-xs font-medium text-neutral-400 dark:text-zinc-500 uppercase tracking-wide">
               Projects
             </span>
           </div>
@@ -253,7 +253,7 @@ export const ProjectSwitcher = () => {
           </div>
 
           {/* Create new project */}
-          <div className="border-t border-zinc-800">
+          <div className="border-t border-black/10 dark:border-zinc-800">
             {isCreating ? (
               <div className="p-2 flex items-center gap-2">
                 <input
@@ -263,12 +263,12 @@ export const ProjectSwitcher = () => {
                   onChange={(e) => setNewProjectName(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Project name"
-                  className="flex-1 px-2 py-1.5 text-sm bg-zinc-800 border border-zinc-600 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500"
+                  className="flex-1 px-2 py-1.5 text-sm bg-neutral-100 dark:bg-zinc-800 border border-black/10 dark:border-zinc-600 rounded text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500"
                 />
                 <button
                   onClick={handleCreateProject}
                   disabled={!newProjectName.trim()}
-                  className="p-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 disabled:text-zinc-500 rounded text-white transition-colors"
+                  className="p-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-200 dark:disabled:bg-zinc-700 disabled:text-neutral-400 dark:disabled:text-zinc-500 rounded text-white transition-colors"
                 >
                   <Check className="w-4 h-4" />
                 </button>
@@ -277,7 +277,7 @@ export const ProjectSwitcher = () => {
                     setIsCreating(false);
                     setNewProjectName("");
                   }}
-                  className="p-1.5 hover:bg-zinc-700 rounded text-zinc-400"
+                  className="p-1.5 hover:bg-neutral-200 dark:hover:bg-zinc-700 rounded text-neutral-400 dark:text-zinc-400"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -285,7 +285,7 @@ export const ProjectSwitcher = () => {
             ) : (
               <button
                 onClick={() => setIsCreating(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-violet-400 hover:bg-zinc-800 transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 New Project

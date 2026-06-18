@@ -1,6 +1,6 @@
 {
-  "short_name": "AppShots",
-  "name": "AppShots - App Store & Google Play Screenshot Generator",
+  "short_name": "ScreenShotEditor",
+  "name": "ScreenShotEditor - Create App Store & Google Play Screenshots",
   "icons": [
     {
       "src": "favicon.ico",
