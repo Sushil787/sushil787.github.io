@@ -6,8 +6,11 @@
     "dev": "bun --bun vite dev",
     "build": "bun --bun vite build && tsc",
     "preview": "bun --bun vite preview",
-    "test": "bun --bun vitest run"
+    "test": "bun --bun vitest run",
+    "electron": "env -u ELECTRON_RUN_AS_NODE electron electron/main.cjs",
+    "electron:dev": "concurrently -k -n vite,electron -c cyan,magenta \"bun run dev\" \"wait-on tcp:127.0.0.1:5173 && env -u ELECTRON_RUN_AS_NODE electron electron/main.cjs\""
   },
+  "main": "electron/main.cjs",
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.132.0",
@@ -20,19 +23,22 @@
     "tailwindcss": "^4.0.6"
   },
   "devDependencies": {
-    "@tanstack/react-router-devtools": "^1.132.0",
-    "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/devtools-vite": "^0.3.11",
+    "@tanstack/react-devtools": "^0.7.0",
+    "@tanstack/react-router-devtools": "^1.132.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^10.0.3",
+    "electron": "^42.4.1",
     "jsdom": "^27.0.0",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
     "vitest": "^3.0.5",
+    "wait-on": "^9.0.10",
     "web-vitals": "^5.1.0"
   }
 }
