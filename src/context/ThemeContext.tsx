@@ -3,7 +3,7 @@
  *
  * Provides light/dark theme state for the app chrome. The choice is persisted
  * to localStorage and reflected as a `.dark` class on the document root, which
- * drives Tailwind's class-based dark variant. Defaults to dark.
+ * drives Tailwind's class-based dark variant. Defaults to light.
  */
 
 import {
@@ -26,11 +26,11 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-/** Reads the persisted theme, falling back to dark. */
+/** Reads the persisted theme, falling back to light. */
 const getInitialTheme = (): Theme => {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = window.localStorage.getItem(STORAGE_KEY);
-  return stored === "light" || stored === "dark" ? stored : "dark";
+  return stored === "light" || stored === "dark" ? stored : "light";
 };
 
 /** Applies (or removes) the `.dark` class on the document root. */
